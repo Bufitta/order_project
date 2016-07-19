@@ -4,10 +4,13 @@ from models import Order
 from forms import OrderForm
 from django.shortcuts import redirect
 from utils import total_sum
-
+import datetime
 
 
 def order_form(request):
+    time_order = datetime.datetime.now()
+    cur_hour = time_order.hour
+    cur_minute = time_order.minute
     if request.method == 'POST':
         if request.POST.get('changed_order_id') is not None:
             changed_order_id = request.POST.get('changed_order_id')
@@ -17,7 +20,6 @@ def order_form(request):
             new_byn = request.POST.get('new_byn')
             new_byr = request.POST.get('new_byr')
             new_comment = request.POST.get('new_comment')
-
             Order.objects.filter(id=changed_order_id).update(buy_product=new_buy_product, name=new_name,
                                                              email=new_email, byn=new_byn , byr=new_byr,
                                                              comment=new_comment)
@@ -28,12 +30,17 @@ def order_form(request):
             if form.is_valid():
                 data = form.cleaned_data
                 order = Order.objects.create(buy_product = data['buy_product'], name = data['name'], email = data['email'], byn = data['byn'], byr = data['byr'], comment = data['comment'])
+
                 return redirect(thanks_for_order)
             context = {'order_form': form}
             return render(request, 'order_form.html', context)
     else:
-
+        if cur_hour<=14 or cur_hour==15 and cur_minute==0:
             context = {'order_form': OrderForm()}
+            return render(request, 'order_form.html', context)
+        else:
+            time_message = 'Заказы принимаются до 15.00'
+            context = {'time_message': time_message}
             return render(request, 'order_form.html', context)
 
 def order_table(request):
