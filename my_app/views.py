@@ -3,6 +3,7 @@ from django.shortcuts import render
 from models import Order
 from forms import OrderForm
 from django.shortcuts import redirect
+from utils import total_sum
 
 
 
@@ -18,6 +19,11 @@ def order_form(request):
     else:
             context = {'order_form': OrderForm()}
             return render(request, 'order_form.html', context)
+
+def order_table(request):
+        list_orders = Order.objects.filter()
+        context = {'orders': list_orders, 'totals': total_sum()}
+        return render(request, 'order_table.html', context)
 
 
 def thanks_for_order(request):
