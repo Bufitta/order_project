@@ -20,3 +20,12 @@ def order_form(request):
             return render(request, 'order_form.html', context)
 
 
+def thanks_for_order(request):
+    if request.user.is_authenticated():
+        return redirect(order_table)
+    else:
+        thanks = 'Ваш заказ принят. Спасибо, что выбрали нашу компанию!'
+        context = {'thanks': thanks}
+        return render(request, 'order_table.html', context)
+
+
