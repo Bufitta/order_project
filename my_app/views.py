@@ -20,6 +20,14 @@ def order_form(request):
             new_byn = request.POST.get('new_byn')
             new_byr = request.POST.get('new_byr')
             new_comment = request.POST.get('new_comment')
+            if ',' in new_byn:
+                new_byn = new_byn.replace(',', '.')
+            if ',' in new_byr:
+                new_byr_list = new_byr.split(',')
+                new_byr = new_byr_list[0]
+            elif '.' in new_byr:
+                new_byr_list = new_byr.split('.')
+                new_byr = new_byr_list[0]
             Order.objects.filter(id=changed_order_id).update(buy_product=new_buy_product, name=new_name,
                                                              email=new_email, byn=new_byn , byr=new_byr,
                                                              comment=new_comment)
