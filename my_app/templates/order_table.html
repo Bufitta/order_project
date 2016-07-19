@@ -23,6 +23,7 @@
 {% if message %}
     <h1 align="center" style="color: mediumvioletred"><i>{{ message }}</i></h1>
 {% endif %}
+{% if orders %}
 <table border="1" align="center" bgcolor="#fff0f5">
     <tr bgcolor=#d8bfd8 align="center">
         <th>
@@ -80,6 +81,13 @@
 <p><b>ВСЕГО BYR:</b> {{ totals.total_byr }} руб.</p>
 <p><b>ИТОГО (BYN):</b> {{ totals.total }} руб.</p>
 </div>
+</form>
+{% else %}
+    <div align="center">
+        <h1 style="color: mediumvioletred"><i>Заказы отсутствуют</i></h1>
+        <a href="/form/">Сделать заказ</a>
+    </div>
+{% endif %}
 {% endif %}
 </body>
 </html>
