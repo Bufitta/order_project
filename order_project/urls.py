@@ -18,10 +18,12 @@ from django.contrib import admin
 from my_app.views import order_form
 from my_app.views import order_table
 from my_app.views import thanks_for_order
+from django.conf.urls import url, include
 
 urlpatterns = [
     url(r'^admin/', admin.site.urls),
     url(r'^form/', order_form, name='form'),
     url(r'^admin_page/', order_table, name='admin_page'),
     url(r'^thanks_page/', thanks_for_order, name='thanks_page'),
+    url(r'^accounts/', include('django.contrib.auth.urls')),
 ]
