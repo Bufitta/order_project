@@ -5,6 +5,21 @@
     <title>Title</title>
 </head>
 <body>
+{% if error %}
+    <div align="center">
+        <h1 style="color: mediumvioletred"><i>{{ error }}</i></h1>
+        <h3 style="color: mediumvioletred"><i>Вы можете сделать заказ или войти под другим пользователем</i></h3>
+        <a href="/form/">Сделать заказ</a>
+        <a href="/accounts/login/">Сменить пользователя</a>
+    </div>
+{% elif thanks %}
+    <div align="center">
+        <h1 style="color: lightseagreen"><i>{{ thanks }}</i></h1>
+        <a href="/form/">Сделать еще один заказ</a>
+    </div>
+{% else %}
+<form action="/admin_page/" method="post">
+{% csrf_token %}
 {% if message %}
     <h1 align="center" style="color: mediumvioletred"><i>{{ message }}</i></h1>
 {% endif %}
@@ -65,5 +80,6 @@
 <p><b>ВСЕГО BYR:</b> {{ totals.total_byr }} руб.</p>
 <p><b>ИТОГО (BYN):</b> {{ totals.total }} руб.</p>
 </div>
+{% endif %}
 </body>
 </html>
