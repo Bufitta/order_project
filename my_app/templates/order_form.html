@@ -1,0 +1,15 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+<form action="/form/" method="post">
+{% csrf_token %}
+        {{ order_form.as_p }}
+        <input type="submit" value="Отправить заказ на обработку" style="background-color: lightgreen">
+        <input type="reset" value="Очистить форму" style="background-color: indianred">
+</form>
+</body>
+</html>
