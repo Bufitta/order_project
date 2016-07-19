@@ -5,6 +5,9 @@
     <title>Title</title>
 </head>
 <body>
+{% if time_message %}
+    <h1 align="center" style="color: mediumvioletred"><i>{{ time_message }}</i></h1>
+{% else %}
 <div align="center">
 <form action="/form/" method="post">
 {% csrf_token %}
@@ -64,5 +67,6 @@
     {% endif %}
 </form>
 </div>
+{% endif %}
 </body>
 </html>
