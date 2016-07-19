@@ -6,8 +6,8 @@ from django.shortcuts import redirect
 from utils import total_sum
 import datetime
 from django.contrib.auth.decorators import login_required
-
-
+from django.core.mail import send_mail
+from django.contrib.auth.models import User
 
 def order_form(request):
     time_order = datetime.datetime.now()
@@ -34,13 +34,21 @@ def order_form(request):
                                                              email=new_email, byn=new_byn , byr=new_byr,
                                                              comment=new_comment)
             update_order = Order.objects.filter(id=changed_order_id).get()
+            if update_order.email:
+                my_order = u'Ваш заказ изменен!\nЧто вы собираетесь купить: {0:s}\nКомментарий по заказу: {1:s}'.format(update_order.buy_product, update_order.comment)
+                send_mail(u'Изменение заказа', my_order, 'djangomailfororder@mail.ru',
+                          [update_order.email])
             return redirect(order_table)
         else:
             form = OrderForm(request.POST)
             if form.is_valid():
                 data = form.cleaned_data
                 order = Order.objects.create(buy_product = data['buy_product'], name = data['name'], email = data['email'], byn = data['byn'], byr = data['byr'], comment = data['comment'])
-
+                if cur_hour == 13 or cur_hour == 15 or (cur_hour == 15 and cur_minute == 0):
+                    if User.objects.filter(is_superuser=True).count()>0:
+                        user = User.objects.filter(is_superuser=True).get()
+                        my_order = u'Заказ {0:s} для {1:s}\nПодробности на сайте http://127.0.0.1:8000/admin_page/'.format(order.buy_product, order.name)
+                        send_mail(u'Поступил новый заказ', my_order, 'djangomailfororder@mail.ru', [user.email])
                 return redirect(thanks_for_order)
             context = {'order_form': form}
             return render(request, 'order_form.html', context)
@@ -68,6 +76,10 @@ def order_table(request):
                     return render(request, 'order_form.html', context)
                 elif delete is not None:
                     delete_order = Order.objects.filter(id = checked_order).get()
+                    if delete_order.email:
+                        my_order = u'Ваш заказ {0:s} для {1:s} удален!'.format(delete_order.buy_product, delete_order.name)
+                        send_mail(u'Удаление заказа', my_order, 'djangomailfororder@mail.ru',
+                                  [delete_order.email])
                     delete_order.delete()
                     new_list_orders = Order.objects.filter()
                     context = {'orders': new_list_orders, 'totals': total_sum()}
@@ -85,8 +97,6 @@ def order_table(request):
         context = {'error': error_user}
         return render(request, 'order_table.html', context)
 
-
-
 def thanks_for_order(request):
     if request.user.is_authenticated():
         return redirect(order_table)
@@ -94,5 +104,3 @@ def thanks_for_order(request):
         thanks = 'Ваш заказ принят. Спасибо, что выбрали нашу компанию!'
         context = {'thanks': thanks}
         return render(request, 'order_table.html', context)
-
-
