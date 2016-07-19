@@ -9,6 +9,21 @@ from utils import total_sum
 
 def order_form(request):
     if request.method == 'POST':
+        if request.POST.get('changed_order_id') is not None:
+            changed_order_id = request.POST.get('changed_order_id')
+            new_buy_product = request.POST.get('new_buy_product')
+            new_name = request.POST.get('new_name')
+            new_email = request.POST.get('new_email')
+            new_byn = request.POST.get('new_byn')
+            new_byr = request.POST.get('new_byr')
+            new_comment = request.POST.get('new_comment')
+
+            Order.objects.filter(id=changed_order_id).update(buy_product=new_buy_product, name=new_name,
+                                                             email=new_email, byn=new_byn , byr=new_byr,
+                                                             comment=new_comment)
+            update_order = Order.objects.filter(id=changed_order_id).get()
+            return redirect(order_table)
+        else:
             form = OrderForm(request.POST)
             if form.is_valid():
                 data = form.cleaned_data
@@ -17,6 +32,7 @@ def order_form(request):
             context = {'order_form': form}
             return render(request, 'order_form.html', context)
     else:
+
             context = {'order_form': OrderForm()}
             return render(request, 'order_form.html', context)
 
