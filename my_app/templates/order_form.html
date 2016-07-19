@@ -5,11 +5,64 @@
     <title>Title</title>
 </head>
 <body>
+<div align="center">
 <form action="/form/" method="post">
 {% csrf_token %}
+    {% if changed_order %}
+        <h3 style="color: lightseagreen">Редактирование заказа "{{ changed_order.buy_product }}"</h3>
+        <table>
+        <tr>
+            <th>
+                Что купить
+            </th>
+            <th>
+                Кому
+            </th>
+             <th>
+                EMAIL
+            </th>
+             <th>
+                Оплачено BYN
+            </th>
+            <th>
+                Оплачено BYR
+            </th>
+            <th>
+                Комментарий
+            </th>
+        </tr>
+        <tr>
+            <input type="hidden" value="{{ changed_order.id }}" name="changed_order_id">
+            <td>
+            <input type="text" value="{{ changed_order.buy_product }}" name="new_buy_product">
+            </td>
+            <td>
+            <input type="text" value="{{ changed_order.name }}" name="new_name">
+            </td>
+            <td>
+            <input type="email" value="{{ changed_order.email }}" name="new_email">
+            </td>
+            <td>
+            <input type="text" value="{{ changed_order.byn }}" name="new_byn">
+            </td>
+            <td>
+            <input type="text" value="{{ changed_order.byr }}" name="new_byr">
+            </td>
+            <td>
+            <input type="text" value="{{ changed_order.comment }}" name="new_comment">
+            </td>
+            <td>
+        </tr>
+        </table>
+        <input type="submit" value="Сохранить" style="background-color: lightgreen">
+        <input type="reset" value="Очистить форму" style="background-color: indianred">
+        <a href="/admin_page/" style="text-decoration: none"><input type="button" value="Отмена" style="background-color: aliceblue"></a>
+    {% else %}
         {{ order_form.as_p }}
         <input type="submit" value="Отправить заказ на обработку" style="background-color: lightgreen">
         <input type="reset" value="Очистить форму" style="background-color: indianred">
+    {% endif %}
 </form>
+</div>
 </body>
 </html>
