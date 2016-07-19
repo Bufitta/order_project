@@ -5,6 +5,8 @@ from forms import OrderForm
 from django.shortcuts import redirect
 from utils import total_sum
 import datetime
+from django.contrib.auth.decorators import login_required
+
 
 
 def order_form(request):
@@ -51,8 +53,9 @@ def order_form(request):
             context = {'time_message': time_message}
             return render(request, 'order_form.html', context)
 
+@login_required(login_url='/accounts/login/')
 def order_table(request):
-
+    if request.user.is_superuser:
         list_orders = Order.objects.filter()
         if request.method == 'POST':
             update = request.POST.get('update')
@@ -77,6 +80,10 @@ def order_table(request):
         else:
             context = {'orders': list_orders, 'totals': total_sum()}
             return render(request, 'order_table.html', context)
+    else:
+        error_user = 'У вас недостаточно прав для просмотра и редактирования заказов'
+        context = {'error': error_user}
+        return render(request, 'order_table.html', context)
 
 
 
