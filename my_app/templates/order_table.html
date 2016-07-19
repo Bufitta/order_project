@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+<table border="1" align="center" bgcolor="#fff0f5">
+    <tr bgcolor=#d8bfd8 align="center">
+        <th>
+            ✓
+        </th>
+        <th>
+            Что купить
+        </th>
+        <th>
+            Кому
+        </th>
+         <th>
+            EMAIL
+        </th>
+         <th>
+            Оплачено BYN
+        </th>
+        <th>
+            Оплачено BYR
+        </th>
+        <th>
+            Комментарий
+        </th>
+    </tr>
+    {% for order in orders %}
+    <tr align="center">
+    <td>
+        <input type="radio" value="{{ order.id }}" name="checked">
+    </td>
+    <td>
+        {{ order.buy_product }}
+    </td>
+    <td>
+        {{ order.name }}
+    </td>
+    <td>
+        {{ order.email }}
+    </td>
+    <td>
+        {{ order.byn }}
+    </td>
+    <td>
+        {{ order.byr }}
+    </td>
+    <td>
+        {{ order.comment }}
+    </td>
+    </tr>
+{% endfor %}
+</table>
+<div align="center">
+<button type="submit" name="update" style="background-color: lightgreen">Редактировать заказ</button>
+<button type="submit" name="delete" style="background-color: indianred">Удалить заказ</button>
+<p><b>ВСЕГО BYN:</b> {{ totals.total_byn }} руб.</p>
+<p><b>ВСЕГО BYR:</b> {{ totals.total_byr }} руб.</p>
+<p><b>ИТОГО (BYN):</b> {{ totals.total }} руб.</p>
+</div>
+</body>
+</html>
