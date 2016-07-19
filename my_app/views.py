@@ -21,9 +21,32 @@ def order_form(request):
             return render(request, 'order_form.html', context)
 
 def order_table(request):
+
         list_orders = Order.objects.filter()
-        context = {'orders': list_orders, 'totals': total_sum()}
-        return render(request, 'order_table.html', context)
+        if request.method == 'POST':
+            update = request.POST.get('update')
+            delete = request.POST.get('delete')
+            checked_order = request.POST.get('checked')
+            if checked_order is not None:
+                if update is not None:
+                    changed_order = Order.objects.filter(id = checked_order).get()
+                    context = {'changed_order': changed_order}
+                    return render(request, 'order_form.html', context)
+                elif delete is not None:
+                    delete_order = Order.objects.filter(id = checked_order).get()
+                    delete_order.delete()
+                    new_list_orders = Order.objects.filter()
+                    context = {'orders': new_list_orders, 'totals': total_sum()}
+                    return render(request, 'order_table.html', context)
+            else:
+                message = 'Вы не выбрали заказ!'
+                context = {'orders': list_orders, 'totals': total_sum(), 'message': message}
+                return render(request, 'order_table.html', context)
+
+        else:
+            context = {'orders': list_orders, 'totals': total_sum()}
+            return render(request, 'order_table.html', context)
+
 
 
 def thanks_for_order(request):
