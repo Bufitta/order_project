@@ -22,38 +22,39 @@ def order_form(request):
             new_byn = request.POST.get('new_byn')
             new_byr = request.POST.get('new_byr')
             new_comment = request.POST.get('new_comment')
-            order = Order.objects.filter(id=changed_order_id).get()
-            if new_byn!='':
-                if ',' in new_byn:
-                    new_byn = new_byn.replace(',', '.')
-            else:
-                new_byn=order.byn
-            if new_byr!='':
-                if ',' in new_byr:
-                    new_byr_list = new_byr.split(',')
-                    new_byr = new_byr_list[0]
-                elif '.' in new_byr:
-                    new_byr_list = new_byr.split('.')
-                    new_byr = new_byr_list[0]
-            else:
-                new_byr=order.byr
+            if Order.objects.filter(id=changed_order_id).count()>0:
+                order = Order.objects.filter(id=changed_order_id).get()
+                if new_byn!='':
+                    if ',' in new_byn:
+                        new_byn = new_byn.replace(',', '.')
+                else:
+                    new_byn=0
+                if new_byr!='':
+                    if ',' in new_byr:
+                        new_byr_list = new_byr.split(',')
+                        new_byr = new_byr_list[0]
+                    elif '.' in new_byr:
+                        new_byr_list = new_byr.split('.')
+                        new_byr = new_byr_list[0]
+                else:
+                    new_byr=0
 
-            Order.objects.filter(id=changed_order_id).update(buy_product=new_buy_product, name=new_name,
-                                                             email=new_email, byn=new_byn , byr=new_byr,
-                                                             comment=new_comment)
-            update_order = Order.objects.filter(id=changed_order_id).get()
-            if order.email:
-                try:
-                    if order.buy_product!=update_order.buy_product or order.name!=update_order.name or \
-                                order.email!=update_order.email or order.byn!=update_order.byn or \
-                                order.byr!=update_order.byr or order.comment!=update_order.comment:
-                        my_order = u'Ваш заказ изменен!\nЧто вы собираетесь купить: {0:s}\n' \
-                                   u'Комментарий по заказу: {1:s}'.format(update_order.buy_product, update_order.comment)
-                        send_mail(u'Изменение заказа', my_order, 'djangomailfororder@mail.ru',
-                                  [order.email])
-                except Exception as e:
-                    request.session['invalid_mail']='Сообщение не отправлено. Email не корректен'
-                    return redirect(order_table)
+                Order.objects.filter(id=changed_order_id).update(buy_product=new_buy_product, name=new_name,
+                                                                 email=new_email, byn=new_byn , byr=new_byr,
+                                                                 comment=new_comment)
+                update_order = Order.objects.filter(id=changed_order_id).get()
+                if order.email:
+                    try:
+                        if order.buy_product!=update_order.buy_product or order.name!=update_order.name or \
+                                    order.email!=update_order.email or order.byn!=update_order.byn or \
+                                    order.byr!=update_order.byr or order.comment!=update_order.comment:
+                            my_order = u'Ваш заказ изменен!\nЧто вы собираетесь купить: {0:s}\n' \
+                                       u'Комментарий по заказу: {1:s}'.format(update_order.buy_product, update_order.comment)
+                            send_mail(u'Изменение заказа', my_order, 'djangomailfororder@mail.ru',
+                                      [order.email])
+                    except Exception as e:
+                        request.session['invalid_mail']='Сообщение не отправлено. Email не корректен'
+                        return redirect(order_table)
 
             return redirect(order_table)
         else:
@@ -104,21 +105,30 @@ def order_table(request):
             delete = request.POST.get('delete')
             checked_order = request.POST.get('checked')
             if checked_order is not None:
-                if update is not None:
-                    changed_order = Order.objects.filter(id = checked_order).get()
-                    context = {'changed_order': changed_order}
-                    return render(request, 'order_form.html', context)
-                elif delete is not None:
-                    delete_order = Order.objects.filter(id = checked_order).get()
-                    if delete_order.email:
-                        my_order = u'Ваш заказ {0:s} для {1:s} удален!'.format(delete_order.buy_product,
-                                                                               delete_order.name)
-                        send_mail(u'Удаление заказа', my_order, 'djangomailfororder@mail.ru',
-                                  [delete_order.email])
-                    delete_order.delete()
-                    new_list_orders = Order.objects.filter()
-                    context = {'orders': new_list_orders, 'totals': total_sum()}
-                    return render(request, 'order_table.html', context)
+                if Order.objects.filter(id=checked_order).count() > 0:
+                    if update is not None:
+                        changed_order = Order.objects.filter(id = checked_order).get()
+                        context = {'changed_order': changed_order}
+                        return render(request, 'order_form.html', context)
+                    elif delete is not None:
+                        delete_order = Order.objects.filter(id = checked_order).get()
+                        try:
+                            if delete_order.email:
+                                my_order = u'Ваш заказ {0:s} для {1:s} удален!'.format(delete_order.buy_product,
+                                                                                       delete_order.name)
+                                send_mail(u'Удаление заказа', my_order, 'djangomailfororder@mail.ru',
+                                          [delete_order.email])
+                        except Exception as e:
+                            delete_order.delete()
+                            new_list_orders = Order.objects.filter()
+                            context = {'invalid_mail': 'Сообщение не отправлено. Email не корректен', 'orders': new_list_orders, 'totals': total_sum()}
+                            return render(request, 'order_table.html', context)
+                        delete_order.delete()
+                        new_list_orders = Order.objects.filter()
+                        context = {'orders': new_list_orders, 'totals': total_sum()}
+                        return render(request, 'order_table.html', context)
+                context = {'orders': list_orders, 'totals': total_sum()}
+                return render(request, 'order_table.html', context)
             else:
                 message = 'Вы не выбрали заказ!'
                 context = {'orders': list_orders, 'totals': total_sum(), 'message': message}
@@ -128,7 +138,7 @@ def order_table(request):
             if request.session.has_key('invalid_mail'):
                 invalid_mail = request.session.get('invalid_mail')
                 del request.session['invalid_mail']
-                context = {'orders': list_orders, 'totals': total_sum(), 'invalid_mail':invalid_mail}
+                context = {'orders': list_orders, 'totals': total_sum(), 'invalid_mail': invalid_mail}
                 return render(request, 'order_table.html', context)
             context = {'orders': list_orders, 'totals': total_sum()}
             return render(request, 'order_table.html', context)
