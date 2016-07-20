@@ -43,7 +43,8 @@ def order_form(request):
                                                              comment=new_comment)
             update_order = Order.objects.filter(id=changed_order_id).get()
             if update_order.email:
-                my_order = u'Ваш заказ изменен!\nЧто вы собираетесь купить: {0:s}\nКомментарий по заказу: {1:s}'.format(update_order.buy_product, update_order.comment)
+                my_order = u'Ваш заказ изменен!\nЧто вы собираетесь купить: {0:s}\n' \
+                           u'Комментарий по заказу: {1:s}'.format(update_order.buy_product, update_order.comment)
                 send_mail(u'Изменение заказа', my_order, 'djangomailfororder@mail.ru',
                           [update_order.email])
             return redirect(order_table)
@@ -51,11 +52,28 @@ def order_form(request):
             form = OrderForm(request.POST)
             if form.is_valid():
                 data = form.cleaned_data
-                order = Order.objects.create(buy_product = data['buy_product'], name = data['name'], email = data['email'], byn = data['byn'], byr = data['byr'], comment = data['comment'])
-                if cur_hour == 13 or cur_hour == 15 or (cur_hour == 15 and cur_minute == 0):
+                if data['byn'] is not None and data['byr'] is not None:
+                    order = Order.objects.create(buy_product = data['buy_product'], name = data['name'],
+                                                 email = data['email'], byn = data['byn'], byr = data['byr'],
+                                                 comment = data['comment'])
+                elif data['byn'] is None and data['byr'] is not None:
+                    order = Order.objects.create(buy_product=data['buy_product'], name=data['name'],
+                                                 email=data['email'], byn=0, byr=data['byr'],
+                                                 comment=data['comment'])
+                elif data['byn'] is not None and data['byr'] is None:
+                    order = Order.objects.create(buy_product=data['buy_product'], name=data['name'],
+                                                 email=data['email'], byn=data['byn'], byr=0,
+                                                 comment=data['comment'])
+                else:
+                    order = Order.objects.create(buy_product=data['buy_product'], name=data['name'],
+                                                 email=data['email'], byn=0, byr=0,
+                                                 comment=data['comment'])
+                if cur_hour == 13 or cur_hour == 14 or (cur_hour == 15 and cur_minute == 0):
                     if User.objects.filter(is_superuser=True).count()>0:
                         user = User.objects.filter(is_superuser=True).get()
-                        my_order = u'Заказ {0:s} для {1:s}\nПодробности на сайте http://127.0.0.1:8000/admin_page/'.format(order.buy_product, order.name)
+                        my_order = u'Заказ {0:s} для {1:s}\n' \
+                                   u'Подробности на сайте http://127.0.0.1:8000/admin_page/'.format(order.buy_product,
+                                                                                                    order.name)
                         send_mail(u'Поступил новый заказ', my_order, 'djangomailfororder@mail.ru', [user.email])
                 return redirect(thanks_for_order)
             context = {'order_form': form}
@@ -85,7 +103,8 @@ def order_table(request):
                 elif delete is not None:
                     delete_order = Order.objects.filter(id = checked_order).get()
                     if delete_order.email:
-                        my_order = u'Ваш заказ {0:s} для {1:s} удален!'.format(delete_order.buy_product, delete_order.name)
+                        my_order = u'Ваш заказ {0:s} для {1:s} удален!'.format(delete_order.buy_product,
+                                                                               delete_order.name)
                         send_mail(u'Удаление заказа', my_order, 'djangomailfororder@mail.ru',
                                   [delete_order.email])
                     delete_order.delete()
