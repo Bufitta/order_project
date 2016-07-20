@@ -42,11 +42,14 @@ def order_form(request):
                                                              email=new_email, byn=new_byn , byr=new_byr,
                                                              comment=new_comment)
             update_order = Order.objects.filter(id=changed_order_id).get()
-            if update_order.email:
-                my_order = u'Ваш заказ изменен!\nЧто вы собираетесь купить: {0:s}\n' \
-                           u'Комментарий по заказу: {1:s}'.format(update_order.buy_product, update_order.comment)
-                send_mail(u'Изменение заказа', my_order, 'djangomailfororder@mail.ru',
-                          [update_order.email])
+            if order.email:
+                if order.buy_product!=update_order.buy_product or order.name!=update_order.name or \
+                                order.email!=update_order.email or order.byn!=update_order.byn or \
+                                order.byr!=update_order.byr or order.comment!=update_order.comment:
+                    my_order = u'Ваш заказ изменен!\nЧто вы собираетесь купить: {0:s}\n' \
+                               u'Комментарий по заказу: {1:s}'.format(update_order.buy_product, update_order.comment)
+                    send_mail(u'Изменение заказа', my_order, 'djangomailfororder@mail.ru',
+                              [order.email])
             return redirect(order_table)
         else:
             form = OrderForm(request.POST)
