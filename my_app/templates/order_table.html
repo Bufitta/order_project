@@ -22,6 +22,8 @@
 {% csrf_token %}
 {% if message %}
     <h1 align="center" style="color: mediumvioletred"><i>{{ message }}</i></h1>
+{% elif invalid_mail %}
+    <h1 align="center" style="color: mediumvioletred"><i>{{ invalid_mail }}</i></h1>
 {% endif %}
 {% if orders %}
 <table border="1" align="center" bgcolor="#fff0f5">
