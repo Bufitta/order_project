@@ -43,13 +43,18 @@ def order_form(request):
                                                              comment=new_comment)
             update_order = Order.objects.filter(id=changed_order_id).get()
             if order.email:
-                if order.buy_product!=update_order.buy_product or order.name!=update_order.name or \
+                try:
+                    if order.buy_product!=update_order.buy_product or order.name!=update_order.name or \
                                 order.email!=update_order.email or order.byn!=update_order.byn or \
                                 order.byr!=update_order.byr or order.comment!=update_order.comment:
-                    my_order = u'Ваш заказ изменен!\nЧто вы собираетесь купить: {0:s}\n' \
-                               u'Комментарий по заказу: {1:s}'.format(update_order.buy_product, update_order.comment)
-                    send_mail(u'Изменение заказа', my_order, 'djangomailfororder@mail.ru',
-                              [order.email])
+                        my_order = u'Ваш заказ изменен!\nЧто вы собираетесь купить: {0:s}\n' \
+                                   u'Комментарий по заказу: {1:s}'.format(update_order.buy_product, update_order.comment)
+                        send_mail(u'Изменение заказа', my_order, 'djangomailfororder@mail.ru',
+                                  [order.email])
+                except Exception as e:
+                    request.session['invalid_mail']='Сообщение не отправлено. Email не корректен'
+                    return redirect(order_table)
+
             return redirect(order_table)
         else:
             form = OrderForm(request.POST)
@@ -120,6 +125,11 @@ def order_table(request):
                 return render(request, 'order_table.html', context)
 
         else:
+            if request.session.has_key('invalid_mail'):
+                invalid_mail = request.session.get('invalid_mail')
+                del request.session['invalid_mail']
+                context = {'orders': list_orders, 'totals': total_sum(), 'invalid_mail':invalid_mail}
+                return render(request, 'order_table.html', context)
             context = {'orders': list_orders, 'totals': total_sum()}
             return render(request, 'order_table.html', context)
     else:
